@@ -22,13 +22,14 @@ const (
 type PositionMove int
 
 type Song struct {
-	Artist           string
-	Title            string
-	Position         int
-	PositionLastWeek int
-	PositionMoved    PositionMove
-	WeeksOnChart     int
-	RecordLabel      string
+	Artist             string
+	Title              string
+	PeakPosition       int
+	Position           int
+	PositionLastWeek   int
+	PositionMoved      PositionMove
+	WeeksOnChart       int
+	RecordLabel        string
 	CoverImageSmallURL string
 	CoverImageLargeURL string
 }
@@ -64,9 +65,15 @@ func processSong(e *goquery.Selection) (*Song, error) {
 		}
 	}
 
+	peakPos, err := strconv.Atoi(e.Find("td:nth-child(4)").Text())
+	if err != nil {
+
+		return nil, errors.Wrap(err, "casting peak position string to integer")
+	}
+
 	weeksOnChart, err := strconv.Atoi(e.Find("td:nth-child(5)").Text())
 	if err != nil {
-		return nil, errors.Wrap(err, "casting position string to integer")
+		return nil, errors.Wrap(err, "casting weeks on chart string to integer")
 	}
 
 	var posMoved PositionMove
@@ -82,13 +89,14 @@ func processSong(e *goquery.Selection) (*Song, error) {
 	coverImageURL, _ := e.Find(".track .cover img").Attr("src")
 
 	return &Song{
-		Artist:           e.Find(".title-artist .artist a").Text(),
-		Title:            e.Find(".title-artist .title a").Text(),
-		Position:         pos,
-		PositionLastWeek: posLastWeek,
-		PositionMoved:    posMoved,
-		WeeksOnChart:     weeksOnChart,
-		RecordLabel:      e.Find(".label").Text(),
+		Artist:             e.Find(".title-artist .artist a").Text(),
+		Title:              e.Find(".title-artist .title a").Text(),
+		PeakPosition:       peakPos,
+		Position:           pos,
+		PositionLastWeek:   posLastWeek,
+		PositionMoved:      posMoved,
+		WeeksOnChart:       weeksOnChart,
+		RecordLabel:        e.Find(".label").Text(),
 		CoverImageSmallURL: coverImageURL,
 		CoverImageLargeURL: strings.Replace(coverImageURL, "img/small?", "img/large?", 1),
 	}, nil
