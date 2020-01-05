@@ -138,7 +138,7 @@ func GetCharts(day, month, year int) (*Chart, error) {
 		})
 	})
 
-	if err := c.Visit(fmt.Sprintf(OfficialChartsUrlTmpl, year, month, day)); err != nil {
+	if err := c.Visit(fmt.Sprintf(officialChartsUrlTmpl, year, month, day)); err != nil {
 		return nil, errors.Wrap(err, "failed visiting officialcharts.com")
 	}
 
