@@ -29,6 +29,8 @@ type Song struct {
 	PositionMoved    PositionMove
 	WeeksOnChart     int
 	RecordLabel      string
+	CoverImageSmallURL string
+	CoverImageLargeURL string
 }
 
 type Chart struct {
@@ -77,6 +79,8 @@ func processSong(e *goquery.Selection) (*Song, error) {
 		posMoved = PositionMoveNew
 	}
 
+	coverImageURL, _ := e.Find(".track .cover img").Attr("src")
+
 	return &Song{
 		Artist:           e.Find(".title-artist .artist a").Text(),
 		Title:            e.Find(".title-artist .title a").Text(),
@@ -85,6 +89,8 @@ func processSong(e *goquery.Selection) (*Song, error) {
 		PositionMoved:    posMoved,
 		WeeksOnChart:     weeksOnChart,
 		RecordLabel:      e.Find(".label").Text(),
+		CoverImageSmallURL: coverImageURL,
+		CoverImageLargeURL: strings.Replace(coverImageURL, "img/small?", "img/large?", 1),
 	}, nil
 }
 
