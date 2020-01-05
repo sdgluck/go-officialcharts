@@ -48,7 +48,7 @@ func isSongRow(e *goquery.Selection) bool {
 	return className == ""
 }
 
-func processSong(e *goquery.Selection) (*Song, error) {
+func processSongRow(e *goquery.Selection) (*Song, error) {
 	pos, err := strconv.Atoi(e.Find(".position").Text())
 	if err != nil {
 		return nil, errors.Wrap(err, "casting position string to integer")
@@ -143,7 +143,7 @@ func GetCharts(day, month, year int) (*Chart, error) {
 			return
 		}
 		eg.Go(func() error {
-			song, err := processSong(e.DOM)
+			song, err := processSongRow(e.DOM)
 			if song == nil || err != nil {
 				return errors.Wrap(err, "failed processing song")
 			}
