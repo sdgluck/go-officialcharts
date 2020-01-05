@@ -15,10 +15,38 @@ func TestGetCharts(t *testing.T) {
 	tests := []struct {
 		name                 string
 		args                 args
+		expectError          string
 		expectLength         int
 		expectFirstSongTitle string
 		expectLastSongTitle  string
 	}{
+		{
+			name: "sad: bad year",
+			args: args{
+				year:  1950,
+				month: 1,
+				day:   1,
+			},
+			expectError: "invalid year, expecting value between 1952 and current year, got 1950",
+		},
+		{
+			name: "sad: bad month",
+			args: args{
+				year:  1950,
+				month: 100,
+				day:   1,
+			},
+			expectError: "invalid month, expecting value between 1-12 inclusive, got 100",
+		},
+		{
+			name: "sad: bad day",
+			args: args{
+				year:  1952,
+				month: 1,
+				day:   50,
+			},
+			expectError: "invalid day, expecting value between 1-31 inclusive, got 50",
+		},
 		{
 			name: "happy: gets chart for Halloween 1992",
 			args: args{
@@ -34,13 +62,17 @@ func TestGetCharts(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
 			result, err := GetCharts(tt.args.day, tt.args.month, tt.args.year)
-			if err != nil {
+
+			if tt.expectError != "" {
+				a.EqualError(err, tt.expectError)
+				return
+			} else if err != nil {
 				t.Fatal(err)
 				return
 			}
-
-			a := assert.New(t)
 
 			a.Len(result.Songs, tt.expectLength)
 			a.Equal(tt.expectFirstSongTitle, result.Songs[0].Title)
