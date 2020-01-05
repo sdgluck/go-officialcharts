@@ -14,26 +14,26 @@ import (
 const officialChartsUrlTmpl = "https://www.officialcharts.com/charts/singles-chart/%d%d%d/"
 
 const (
-	PositionMoveUp PositionMove = 1
+	PositionMoveUp   PositionMove = 1
 	PositionMoveDown PositionMove = 2
-	PositionMoveNew PositionMove = 3
+	PositionMoveNew  PositionMove = 3
 )
 
 type PositionMove int
 
 type Song struct {
-	Artist       string
-	Title        string
-	Position     int
+	Artist           string
+	Title            string
+	Position         int
 	PositionLastWeek int
-	PositionMoved PositionMove
-	WeeksOnChart int
-	RecordLabel  string
+	PositionMoved    PositionMove
+	WeeksOnChart     int
+	RecordLabel      string
 }
 
 type Chart struct {
-	Date time.Time
-	Songs[] *Song
+	Date  time.Time
+	Songs []*Song
 }
 
 func isSongRow(e *goquery.Selection) bool {
@@ -110,13 +110,13 @@ func GetCharts(day, month, year int) (*Chart, error) {
 
 	initialised := false
 
-	c.OnHTML("section.chart .chart-positions tbody", func (e *colly.HTMLElement) {
+	c.OnHTML("section.chart .chart-positions tbody", func(e *colly.HTMLElement) {
 		if initialised {
 			return
 		}
 		initialised = true
 		var size int
-		e.DOM.Find("tr").Each(func (i int, e *goquery.Selection) {
+		e.DOM.Find("tr").Each(func(i int, e *goquery.Selection) {
 			if isSongRow(e) {
 				size += 1
 			}
@@ -133,7 +133,7 @@ func GetCharts(day, month, year int) (*Chart, error) {
 			if song == nil || err != nil {
 				return errors.Wrap(err, "failed processing song")
 			}
-			chart.Songs[song.Position - 1] = song
+			chart.Songs[song.Position-1] = song
 			return nil
 		})
 	})

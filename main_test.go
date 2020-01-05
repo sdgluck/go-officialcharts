@@ -7,28 +7,28 @@ import (
 
 func TestGetCharts(t *testing.T) {
 	type args struct {
-		year int
+		year  int
 		month int
-		day int
+		day   int
 	}
 
 	tests := []struct {
-		name string
-		args args
-		expectLength int
+		name                 string
+		args                 args
+		expectLength         int
 		expectFirstSongTitle string
-		expectLastSongTitle string
+		expectLastSongTitle  string
 	}{
 		{
 			name: "happy: gets chart for Halloween 1992",
 			args: args{
-				year: 1992,
+				year:  1992,
 				month: 10,
-				day: 31,
+				day:   31,
 			},
-			expectLength: 75,
+			expectLength:         75,
 			expectFirstSongTitle: "END OF THE ROAD",
-			expectLastSongTitle: "ROADHOUSE MEDLEY (ANNIVERSARY WALTZ PART 25)",
+			expectLastSongTitle:  "ROADHOUSE MEDLEY (ANNIVERSARY WALTZ PART 25)",
 		},
 	}
 
@@ -44,7 +44,7 @@ func TestGetCharts(t *testing.T) {
 
 			a.Len(result.Songs, tt.expectLength)
 			a.Equal(tt.expectFirstSongTitle, result.Songs[0].Title)
-			a.Equal(tt.expectLastSongTitle, result.Songs[tt.expectLength - 1].Title)
+			a.Equal(tt.expectLastSongTitle, result.Songs[tt.expectLength-1].Title)
 		})
 	}
 }
