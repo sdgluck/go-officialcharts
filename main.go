@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const OfficialChartsUrlTmpl = "https://www.officialcharts.com/charts/singles-chart/%d%d%d/"
+const officialChartsUrlTmpl = "https://www.officialcharts.com/charts/singles-chart/%d%d%d/"
 
 const (
 	PositionMoveUp PositionMove = 1
