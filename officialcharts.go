@@ -104,10 +104,10 @@ func processSongRow(e *goquery.Selection) (*Song, error) {
 
 // GetCharts scrapes the officalcharts.com singles chart for the given date.
 func GetCharts(day, month, year int) (*Chart, error) {
-	if day == 0 || day > 31 {
+	if day < 1 || day > 31 {
 		return nil, fmt.Errorf("invalid day, expecting value between 1-31 inclusive, got %d", day)
 	}
-	if month == 0 || month > 12 {
+	if month < 1 || month > 12 {
 		return nil, fmt.Errorf("invalid month, expecting value between 1-12 inclusive, got %d", month)
 	}
 	if year < 1952 || year > time.Now().Year() {
