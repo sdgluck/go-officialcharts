@@ -28,6 +28,7 @@ type Song struct {
 	Position           int
 	PositionLastWeek   int
 	PositionMoved      PositionMove
+	PositionReentry    bool
 	WeeksOnChart       int
 	RecordLabel        string
 	CoverImageSmallURL string
@@ -49,6 +50,8 @@ func isSongRow(e *goquery.Selection) bool {
 }
 
 func processSongRow(e *goquery.Selection) (*Song, error) {
+	var isReentry bool
+
 	pos, err := strconv.Atoi(e.Find(".position").Text())
 	if err != nil {
 		return nil, errors.Wrap(err, "casting position string to integer")
@@ -56,7 +59,8 @@ func processSongRow(e *goquery.Selection) (*Song, error) {
 
 	var posLastWeek int
 	posLastWeekStr := strings.TrimSpace(e.Find(".last-week").Text())
-	if posLastWeekStr == "New" {
+	if posLastWeekStr == "New" || posLastWeekStr == "Re" {
+		isReentry = posLastWeekStr == "Re"
 		posLastWeek = -1
 	} else {
 		posLastWeek, err = strconv.Atoi(posLastWeekStr)
@@ -95,6 +99,7 @@ func processSongRow(e *goquery.Selection) (*Song, error) {
 		Position:           pos,
 		PositionLastWeek:   posLastWeek,
 		PositionMoved:      posMoved,
+		PositionReentry:    isReentry,
 		WeeksOnChart:       weeksOnChart,
 		RecordLabel:        e.Find(".label").Text(),
 		CoverImageSmallURL: coverImageURL,
