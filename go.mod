@@ -1,4 +1,4 @@
-module go-officialcharts
+module github.com/sdgluck/go-officialcharts
 
 go 1.13
 
