@@ -2,13 +2,14 @@ package go_officialcharts
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const officialChartsUrlTmpl = "https://www.officialcharts.com/charts/singles-chart/%d%d%d/"
@@ -54,7 +55,7 @@ func processSongRow(e *goquery.Selection) (*Song, error) {
 
 	pos, err := strconv.Atoi(e.Find(".position").Text())
 	if err != nil {
-		return nil, errors.Wrap(err, "casting position string to integer")
+		return nil, errors.Wrap(err, "converting position string to integer")
 	}
 
 	var posLastWeek int
@@ -65,19 +66,19 @@ func processSongRow(e *goquery.Selection) (*Song, error) {
 	} else {
 		posLastWeek, err = strconv.Atoi(posLastWeekStr)
 		if err != nil {
-			return nil, errors.Wrap(err, "casting position last week to integer")
+			return nil, errors.Wrap(err, "converting position last week to integer")
 		}
 	}
 
 	peakPos, err := strconv.Atoi(e.Find("td:nth-child(4)").Text())
 	if err != nil {
 
-		return nil, errors.Wrap(err, "casting peak position string to integer")
+		return nil, errors.Wrap(err, "converting peak position string to integer")
 	}
 
 	weeksOnChart, err := strconv.Atoi(e.Find("td:nth-child(5)").Text())
 	if err != nil {
-		return nil, errors.Wrap(err, "casting weeks on chart string to integer")
+		return nil, errors.Wrap(err, "converting weeks on chart string to integer")
 	}
 
 	var posMoved PositionMove
@@ -127,13 +128,9 @@ func GetCharts(day, month, year int) (*Chart, error) {
 
 	c := colly.NewCollector()
 
-	initialised := false
+	tBodySelector := "section.chart .chart-positions tbody"
 
-	c.OnHTML("section.chart .chart-positions tbody", func(e *colly.HTMLElement) {
-		if initialised {
-			return
-		}
-		initialised = true
+	c.OnHTML(tBodySelector, func(e *colly.HTMLElement) {
 		var size int
 		e.DOM.Find("tr").Each(func(i int, e *goquery.Selection) {
 			if isSongRow(e) {
@@ -141,16 +138,23 @@ func GetCharts(day, month, year int) (*Chart, error) {
 			}
 		})
 		chart.Songs = make([]*Song, size)
+		c.OnHTMLDetach(tBodySelector)
 	})
 
 	c.OnHTML("section.chart .chart-positions tr", func(e *colly.HTMLElement) {
+		if chart.Songs == nil {
+			eg.Go(func() error {
+				return errors.New("songs slice uninitialised")
+			})
+			return
+		}
 		if !isSongRow(e.DOM) {
 			return
 		}
 		eg.Go(func() error {
 			song, err := processSongRow(e.DOM)
 			if song == nil || err != nil {
-				return errors.Wrap(err, "failed processing song")
+				return errors.Wrap(err, "processing song")
 			}
 			chart.Songs[song.Position-1] = song
 			return nil
@@ -158,11 +162,11 @@ func GetCharts(day, month, year int) (*Chart, error) {
 	})
 
 	if err := c.Visit(fmt.Sprintf(officialChartsUrlTmpl, year, month, day)); err != nil {
-		return nil, errors.Wrap(err, "failed visiting officialcharts.com")
+		return nil, errors.Wrap(err, "visiting officialcharts.com")
 	}
 
 	if err := eg.Wait(); err != nil {
-		return nil, errors.Wrap(err, "failed getting charts")
+		return nil, errors.Wrap(err, "getting charts")
 	}
 
 	return chart, nil
